@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>When Cities Outsource, Who Keeps Citizens at the Table?</title>
+
+<!-- D3 + TopoJSON -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3"></script>
+<!-- Scrollama -->
+<script src="https://unpkg.com/scrollama@3.2.0/build/scrollama.min.js"></script>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,800;0,900;1,700&display=swap" rel="stylesheet" />
+
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e8; overflow-x: hidden; }
+
+/* ===== HERO ===== */
+#hero {
+  height: 100vh; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; text-align: center;
+  background:
+    linear-gradient(180deg, rgba(10,10,15,0.55) 0%, rgba(14,16,40,0.72) 40%, rgba(17,17,53,0.82) 60%, rgba(10,10,15,0.95) 100%),
+    url('Gemini_Generated_Image_addt03addt03addt.png') center/cover no-repeat;
+  position: relative; padding: 2rem;
+}
+#hero h1 {
+  font-family: 'Playfair Display', serif; font-size: clamp(2.2rem, 5vw, 4rem);
+  font-weight: 800; line-height: 1.18; color: #fff;
+  max-width: 780px; margin-bottom: 1.4rem;
+}
+#hero h1 span { color: #fbbf24; }
+#hero .subtitle {
+  font-size: clamp(1rem, 1.8vw, 1.2rem); font-weight: 300;
+  color: #9a9ab0; max-width: 580px; line-height: 1.7; margin-bottom: 1rem;
+}
+#hero .meta-line {
+  font-size: 0.78rem; color: #444; margin-top: 0.8rem; line-height: 1.5;
+}
+#hero .scroll-cue {
+  position: absolute; bottom: 2.5rem; animation: bounce 2s infinite;
+  color: #fbbf24; font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase;
+}
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(8px); }
+}
+
+/* ===== SCROLLY ===== */
+#scrolly { position: relative; display: flex; }
+#scrolly .scrolly-map {
+  position: sticky; top: 0; width: 55%; height: 100vh;
+  background: #0d0d18; overflow: hidden;
+}
+#scrolly .scrolly-map svg { width: 100%; height: 100%; }
+#scrolly .story { width: 45%; padding: 0; }
+
+.step {
+  min-height: 92vh; padding: 4rem 3rem; display: flex;
+  flex-direction: column; justify-content: center;
+  opacity: 0.12; transition: opacity 0.6s ease;
+}
+.step.is-active { opacity: 1; }
+
+.step .step-label {
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.15em;
+  color: #fbbf24; margin-bottom: 0.6rem; font-weight: 600;
+}
+.step h2 {
+  font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+  font-weight: 800; color: #fff; margin-bottom: 1rem; line-height: 1.25;
+}
+.step .stat-big {
+  font-size: clamp(2.8rem, 5.5vw, 4.5rem); font-weight: 900;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text; line-height: 1; margin-bottom: 0.3rem;
+}
+.step .stat-label {
+  font-size: 0.9rem; color: #9a9ab0; margin-bottom: 1.1rem;
+}
+.step p {
+  font-size: 0.98rem; line-height: 1.75; color: #b0b0c0; max-width: 420px;
+  margin-bottom: 0.8rem;
+}
+.step p strong { color: #ddd; font-weight: 600; }
+.step p em { color: #e0c97a; font-style: italic; }
+
+/* Highlight box */
+.step .insight-box {
+  margin-top: 1rem; padding: 1rem 1.2rem;
+  background: rgba(251,191,36,0.06); border-left: 3px solid #fbbf24;
+  border-radius: 0 6px 6px 0; font-size: 0.9rem; color: #c0c8e0; line-height: 1.6;
+}
+
+/* Target bars */
+.step .target-bars { margin-top: 1.2rem; }
+.step .target-bar { margin-bottom: 0.7rem; }
+.step .target-bar .bar-label {
+  font-size: 0.78rem; color: #9a9ab0; margin-bottom: 0.2rem;
+  display: flex; justify-content: space-between;
+}
+.step .target-bar .bar-track {
+  height: 5px; background: #1a1a2e; border-radius: 3px; overflow: hidden;
+}
+.step .target-bar .bar-fill {
+  height: 100%; border-radius: 3px; transition: width 1s ease;
+  background: linear-gradient(90deg, #fbbf24, #f59e0b);
+}
+
+/* Cascade bars */
+.cascade-bars { margin-top: 1rem; }
+.cascade-bar { margin-bottom: 0.6rem; }
+.cascade-bar .bar-label {
+  font-size: 0.78rem; color: #9a9ab0; margin-bottom: 0.2rem;
+  display: flex; justify-content: space-between;
+}
+.cascade-bar .bar-track {
+  height: 5px; background: #1a1a2e; border-radius: 3px; overflow: hidden;
+}
+.cascade-bar .bar-fill { height: 100%; border-radius: 3px; transition: width 1s ease; }
+
+/* Image placeholder */
+.step .image-placeholder {
+  margin-top: 1.2rem; padding: 2rem 1.5rem;
+  border: 1px dashed #333; border-radius: 8px;
+  text-align: center; color: #555; font-size: 0.8rem; line-height: 1.5;
+  background: rgba(20,20,35,0.5);
+}
+
+/* ===== MAP UI ===== */
+.map-legend {
+  position: absolute; bottom: 2rem; left: 2rem;
+  background: rgba(10,10,15,0.88); backdrop-filter: blur(8px);
+  border: 1px solid #222; border-radius: 8px; padding: 0.9rem 1.1rem;
+  font-size: 0.72rem; color: #999; z-index: 10;
+}
+.map-legend .legend-title { font-weight: 600; color: #ccc; margin-bottom: 0.4rem; }
+.map-legend .legend-item { display: flex; align-items: center; gap: 0.45rem; margin-bottom: 0.25rem; }
+.map-legend .legend-swatch { width: 13px; height: 13px; border-radius: 3px; flex-shrink: 0; }
+
+.map-counter {
+  position: absolute; top: 2rem; right: 2rem;
+  background: rgba(10,10,15,0.88); backdrop-filter: blur(8px);
+  border: 1px solid #222; border-radius: 8px; padding: 0.7rem 1.1rem;
+  font-size: 0.72rem; color: #999; z-index: 10; text-align: right;
+}
+.map-counter .counter-num { font-size: 1.7rem; font-weight: 800; color: #fbbf24; line-height: 1; }
+.map-counter .counter-label { margin-top: 0.12rem; }
+
+.tooltip {
+  position: absolute; pointer-events: none; z-index: 100;
+  background: rgba(10,10,20,0.93); backdrop-filter: blur(6px);
+  border: 1px solid #333; border-radius: 6px; padding: 0.55rem 0.75rem;
+  font-size: 0.72rem; color: #ddd; white-space: nowrap;
+  transform: translate(-50%, -115%); display: none;
+}
+
+/* ===== FOOTER ===== */
+#footer {
+  padding: 4rem 2rem; text-align: center; color: #444; font-size: 0.78rem;
+  border-top: 1px solid #1a1a2e; line-height: 1.8;
+}
+#footer a { color: #fbbf24; text-decoration: none; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  #scrolly { flex-direction: column; }
+  #scrolly .scrolly-map { width: 100%; height: 45vh; }
+  #scrolly .story { width: 100%; }
+  .step { padding: 2.5rem 1.5rem; min-height: 65vh; }
+}
+
+/* ===== PHOTO INTERLUDE ===== */
+.photo-interlude {
+  width: 100%; position: relative; overflow: hidden;
+}
+.photo-interlude img {
+  width: 100%; height: 55vh; object-fit: cover;
+  filter: brightness(0.6);
+}
+.photo-interlude .photo-caption {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 3rem 3rem 2rem;
+  background: linear-gradient(0deg, rgba(10,10,15,1) 0%, rgba(10,10,15,0.7) 60%, transparent 100%);
+}
+.photo-interlude .photo-caption h2 {
+  font-family: 'Playfair Display', serif; font-size: clamp(1.6rem, 3vw, 2.4rem);
+  font-weight: 800; color: #fff; margin-bottom: 0.6rem; line-height: 1.25;
+}
+.photo-interlude .photo-caption p {
+  font-size: 0.95rem; color: #b0b0c0; max-width: 600px; line-height: 1.7;
+}
+
+/* Step inline image */
+.step .step-photo {
+  width: 100%; max-width: 420px; border-radius: 8px; margin-top: 1.2rem;
+  opacity: 0.85; transition: opacity 0.4s ease;
+}
+.step.is-active .step-photo { opacity: 1; }
+
+/* Full-width interlude (breaks out of story column) */
+.step-fullwidth {
+  position: relative;
+  width: 100vw !important;
+  margin-left: -55vw !important;
+  padding: 0 !important;
+  min-height: auto !important;
+  z-index: 30;
+  background: #0a0a0f;
+}
+.step-fullwidth .interlude-img {
+  width: 100%;
+  max-height: 55vh;
+  object-fit: cover;
+  display: block;
+}
+.step-fullwidth .interlude-body {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 4rem;
+}
+.step-fullwidth .interlude-body h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+  font-weight: 800; color: #fff; margin-bottom: 1rem; line-height: 1.25;
+}
+.step-fullwidth .interlude-body .step-label {
+  font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.15em;
+  color: #fbbf24; margin-bottom: 0.6rem; font-weight: 600;
+}
+.step-fullwidth .interlude-body p {
+  font-size: 1rem; line-height: 1.75; color: #b0b0c0; margin-bottom: 0.8rem; max-width: none;
+}
+.step-fullwidth .interlude-body p strong { color: #ddd; font-weight: 600; }
+
+/* Core story pull-quote */
+.pull-quote {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(1.2rem, 2.2vw, 1.6rem);
+  font-weight: 700;
+  font-style: italic;
+  color: #d0d8f0;
+  line-height: 1.55;
+  margin: 1.8rem 0;
+  padding: 1.2rem 1.6rem;
+  border-left: 3px solid #fbbf24;
+  background: rgba(251,191,36,0.06);
+  border-radius: 0 6px 6px 0;
+}
+.pull-quote::before { content: '\201C '; }
+.pull-quote::after { content: ' \201D'; }
+
+/* County paths */
+.county { stroke: #1a1a2e; stroke-width: 0.3px; transition: fill 0.6s ease; cursor: pointer; }
+.county:hover { stroke: #fff; stroke-width: 1px; }
+.state-border { fill: none; stroke: #2a2a3e; stroke-width: 0.7px; pointer-events: none; }
+.univ-dot { pointer-events: none; }
+</style>
+</head>
+
+<body>
+
+<!-- ==================== HERO ==================== -->
+<div id="hero">
+  <h1>When Cities Outsource,<br>Who Keeps Citizens<br><span>at the Table</span>?</h1>
+  <p class="subtitle">Across America, local governments are outsourcing public services to private organizations. Does privatization reduce citizen co-production? And in a privatized service landscape, are there institutional anchors that help sustain citizen participation?</p>
+  <p class="meta-line">Data: ICMA Alternative Service Delivery Survey<br>Research: Institutional Infrastructure and Co-production in Privatized Governance</p>
+  <div class="scroll-cue">Scroll to explore &#8595;</div>
+</div>
+
+<!-- ==================== SCROLLY ==================== -->
+<div id="scrolly">
+  <div class="scrolly-map">
+    <svg id="map"></svg>
+    <div class="map-legend" id="legend"></div>
+    <div class="map-counter" id="counter" style="display:none;">
+      <div class="counter-num" id="counter-num">0</div>
+      <div class="counter-label" id="counter-label">jurisdictions</div>
+    </div>
+    <div class="tooltip" id="tooltip"></div>
+    <div class="map-source" style="position:absolute;bottom:2rem;right:2rem;font-size:0.65rem;color:#555;z-index:10;">Data Source: ICMA Alternative Service Delivery Survey</div>
+    <div id="map-photo" style="position:absolute;inset:0;z-index:20;opacity:0;transition:opacity 0.8s ease;pointer-events:none;">
+      <img id="map-photo-img" src="" alt="" style="width:100%;height:100%;object-fit:cover;" />
+      <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,15,0) 50%,rgba(10,10,15,0.7) 100%);"></div>
+    </div>
+  </div>
+
+  <div class="story">
+
+    <!-- ===== Step -2: All Survey Respondents ===== -->
+    <div class="step" data-step="all_survey">
+      <div class="step-label">The Data</div>
+      <h2>2,343 Local Governments Responded</h2>
+      <div class="stat-big">2,343</div>
+      <div class="stat-label">local governments across America</div>
+      <p>In 2017, the <strong>International City/County Management Association (ICMA)</strong> conducted its Alternative Service Delivery Survey, reaching local governments nationwide.</p>
+      <p><strong>2,343 local governments</strong> responded, including counties, cities, and towns, spanning <strong>1,225 counties</strong> across every region of the United States. Each highlighted boundary on this map represents a county where at least one local government participated.</p>
+    </div>
+
+    <!-- ===== Step -1: Privatization Experience ===== -->
+    <div class="step" data-step="privatization">
+      <div class="step-label">Privatization</div>
+      <h2>Who Has Outsourced Public Services?</h2>
+      <p>The survey cataloged <strong>67 public services</strong>, from road maintenance to public safety, and tracked how each is delivered: by government employees, for-profit contractors, nonprofits, or other governments.</p>
+      <p>Highlighted on this map are counties where local governments have actively pursued private service delivery. Across the full sample, privatization is not binary but a <strong>spectrum</strong>: some communities outsource a handful of services, while others contract out the majority.</p>
+      <p>But what happens to <strong>citizen participation</strong> as more services move outside government? Does outsourcing silence the public voice, or can something anchor it?</p>
+    </div>
+
+    <!-- ===== Step 0: Co-Production Respondents ===== -->
+    <div class="step" data-step="landscape">
+      <div class="step-label">The Study Sample</div>
+      <h2>Zooming In: Who Co-Produces?</h2>
+      <div class="stat-big">738</div>
+      <div class="stat-label">local governments with co-production data</div>
+      <p>The same ICMA survey also asked about <strong>citizen co-production</strong>: whether local governments involve citizens in planning, designing, delivering, and assessing public services.</p>
+      <p><strong>738 local governments</strong> (625 cities and 113 counties) provided co-production data. On this map, responses are aggregated to the <strong>county level</strong> (572 counties) for geographic visualization, but the study analyzes each jurisdiction individually.</p>
+    </div>
+
+    <!-- ===== Step 1: What is co-production (full-width interlude) ===== -->
+    <div class="step step-fullwidth" data-step="what_coprod">
+      <img class="interlude-img" src="coproduction.png" alt="Public Service Co-Production" />
+      <div class="interlude-body">
+        <div class="step-label">Co-production</div>
+        <h2>Citizens as Partners, Not Just Customers</h2>
+        <p><strong>Co-production</strong> is when citizens don't just receive services; they help shape them. They sit at planning meetings. They help design programs. They volunteer alongside city workers. They evaluate whether services are actually working.</p>
+        <p>It's democracy in action, not just at the ballot box, but in the everyday work of running a city.</p>
+        <p>We explored co-production across <strong>four stages</strong> of the service lifecycle (planning, design, delivery, and assessment) and examined <strong>who</strong> local governments co-produce with: organized civic groups or individual citizens. Let's walk through what we found.</p>
+      </div>
+    </div>
+
+    <!-- ===== Step 2: Co-Planning ===== -->
+    <div class="step" data-step="coplan">
+      <div class="step-label">Stage 1 of 4</div>
+      <h2>Co-Planning</h2>
+      <p>The most common form of co-production. The vast majority of responding local governments engage citizens at the planning stage, identifying problems, setting priorities, and defining community needs.</p>
+      <p>But <strong>who</strong> do they co-plan with? Not all partners are equal. Organized civic groups are the most common partner, while individual citizens, unaffiliated residents without organizational backing, participate the least.</p>
+      <div class="target-bars">
+        <div class="target-bar"><div class="bar-label"><span>Organized Civic Groups</span><span>48.1%</span></div><div class="bar-track"><div class="bar-fill" style="width:48.1%"></div></div></div>
+        <div class="target-bar"><div class="bar-label"><span>Individual Citizens</span><span>34.6%</span></div><div class="bar-track"><div class="bar-fill" style="width:34.6%"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ===== Step 3: Co-Delivery ===== -->
+    <div class="step" data-step="codelivery">
+      <div class="step-label">Stage 3 of 4</div>
+      <h2>Co-Delivery</h2>
+      <p>This is hands-on. Many local governments partner with citizens in service delivery: neighborhood watch patrols, community clean-ups, tutoring programs run with city support.</p>
+      <p>It's the most <strong>visible</strong> form of co-production, but participation is dropping compared to the earlier stages. Not every community has the capacity, or the institutional support, to make this work.</p>
+      <div class="target-bars">
+        <div class="target-bar"><div class="bar-label"><span>Organized Civic Groups</span><span>35.5%</span></div><div class="bar-track"><div class="bar-fill" style="width:35.5%"></div></div></div>
+        <div class="target-bar"><div class="bar-label"><span>Individual Citizens</span><span>32.8%</span></div><div class="bar-track"><div class="bar-fill" style="width:32.8%"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ===== Step 5: Co-Assessment ===== -->
+    <div class="step" data-step="coassess">
+      <div class="step-label">Stage 4 of 4</div>
+      <h2>Co-Assessment</h2>
+      <p>The final stage. Citizens evaluate whether services are actually working. Did the new recycling program reduce waste? Is the contracted road maintenance actually filling potholes?</p>
+      <p>This is where the <strong>feedback loop</strong> closes, but it's also the least common stage. Accountability is hard to practice when services are spread across multiple private providers.</p>
+      <div class="target-bars">
+        <div class="target-bar"><div class="bar-label"><span>Individual Citizens</span><span>28.9%</span></div><div class="bar-track"><div class="bar-fill" style="width:28.9%"></div></div></div>
+        <div class="target-bar"><div class="bar-label"><span>Organized Civic Groups</span><span>26.2%</span></div><div class="bar-track"><div class="bar-fill" style="width:26.2%"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ===== Step 6: The Privatization Puzzle ===== -->
+    <div class="step" data-step="puzzle">
+      <div class="step-label">The Puzzle</div>
+      <h2>Does Privatization Alone Explain It?</h2>
+      <p>Here's what surprised us. When we looked at the data, <strong>privatization by itself neither helps nor hurts</strong> citizen co-production. Communities that outsource heavily and those that don't show similar levels of co-production.</p>
+      <p>For decades, scholars have debated whether privatization helps or hinders citizen participation. But what if neither camp is asking the right question?</p>
+      <div class="pull-quote">What if, in a privatized service environment, citizen participation doesn't disappear on its own, but needs institutional support to survive? Could there be anchors that help citizens stay engaged even when services are outsourced?</div>
+    </div>
+
+    <!-- ===== Photo Interlude ===== -->
+    <div class="step" data-step="photo_break">
+      <div class="step-label">A Closer Look</div>
+      <h2>What if the answer was already in your neighborhood?</h2>
+      <p>Across the country, universities open their doors to communities. Round tables replace lecture halls. Residents sit alongside researchers.</p>
+      <p>This is where institutional infrastructure comes to life.</p>
+    </div>
+
+    <!-- ===== Step 7.5: Research Question ===== -->
+    <div class="step" data-step="research_q">
+      <div class="step-label">The Research Question</div>
+      <h2>Could Institutional Infrastructure Be the Missing Link?</h2>
+      <p>In a privatized governance environment, citizens face new barriers to participation: fragmented service providers, unclear accountability, and complex contractual structures. <strong>Do they need institutional support to stay engaged?</strong></p>
+      <p>We examined whether <em>institutional infrastructure</em>, the knowledge resources, relational networks, and physical spaces that support civic participation, could moderate the relationship between privatization and co-production.</p>
+      <p>More specifically, we looked at three dimensions of institutional infrastructure: the capacity to translate complex policy into accessible knowledge, the ability to convene diverse stakeholders in neutral settings, and the organizational resources to sustain civic engagement over time.</p>
+    </div>
+
+    <!-- ===== Step 8: Enter the University ===== -->
+    <div class="step" data-step="universities">
+      <div class="step-label">The Discovery</div>
+      <h2>The Unexpected Anchor: Universities</h2>
+      <div class="stat-big">148</div>
+      <div class="stat-label">jurisdictions with a four-year university (20.1%)</div>
+      <p>Look at the yellow dots appearing on the map. Each one marks a county where at least one jurisdiction hosts a four-year university. In total, <strong>148 jurisdictions</strong> (43 counties and 105 cities) have a university nearby.</p>
+      <p>Here's what we found: <strong>when a university is present, privatization actually boosts citizen co-production.</strong> Without a university? Outsourcing has no measurable effect. With one? The relationship flips positive.</p>
+      <p>Universities act as <em>institutional anchors</em>, providing the knowledge, neutral spaces, and organizational capacity that citizens need to participate in a fragmented service landscape.</p>
+    </div>
+
+    <!-- ===== Step 10: For-profit vs Nonprofit ===== -->
+    <div class="step" data-step="sectors">
+      <div class="step-label">The Sector Divide</div>
+      <h2>Not All Outsourcing Is Equal</h2>
+      <p>When services go to <strong>nonprofit organizations</strong>, citizen participation tends to happen naturally. Nonprofits have missions aligned with community engagement and often bring their own participatory culture.</p>
+      <p>But when <strong>for-profit organizations</strong> take over, the picture is starkly different. Cost-efficiency and contractual compliance crowd out citizen voice. Unless there's an anchor.</p>
+      <div class="pull-quote">In communities with a university, even for-profit contracting environments show higher citizen co-production. The university provides a counterweight to market-driven governance, creating spaces where citizens can still be heard.</div>
+    </div>
+
+    <!-- ===== Step 11: When It Matters Most ===== -->
+    <div class="step" data-step="when_matters">
+      <div class="step-label">When It Matters</div>
+      <h2>The Early Stages Are the Hardest</h2>
+      <p>The university effect is strongest at <strong>co-planning and co-design</strong>, the stages where knowledge barriers are highest. These are the stages where citizens need to understand complex policy, navigate competing interests, and propose viable solutions.</p>
+      <p>By the time we get to co-delivery and co-assessment, the barriers shift from <em>knowledge</em> to <em>logistics</em>. You don't need a professor to help you pick up trash in a park. But you might need one to help you challenge a city's budget priorities.</p>
+      <div class="cascade-bars">
+        <div class="cascade-bar"><div class="bar-label"><span>Co-Planning</span><span>Strongest effect</span></div><div class="bar-track"><div class="bar-fill" style="width:95%; background:linear-gradient(90deg,#3b82f6,#60a5fa);"></div></div></div>
+        <div class="cascade-bar"><div class="bar-label"><span>Co-Design</span><span>Strong effect</span></div><div class="bar-track"><div class="bar-fill" style="width:85%; background:linear-gradient(90deg,#6366f1,#818cf8);"></div></div></div>
+        <div class="cascade-bar"><div class="bar-label"><span>Co-Delivery</span><span>Moderate</span></div><div class="bar-track"><div class="bar-fill" style="width:60%; background:linear-gradient(90deg,#8b5cf6,#a78bfa);"></div></div></div>
+        <div class="cascade-bar"><div class="bar-label"><span>Co-Assessment</span><span>Marginal</span></div><div class="bar-track"><div class="bar-fill" style="width:35%; background:linear-gradient(90deg,#a855f7,#c084fc);"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ===== Step 12a: Takeaway - The Problem ===== -->
+    <div class="step" data-step="takeaway_problem">
+      <div class="step-label">The Takeaway</div>
+      <h2>Outsourcing Without Anchors Leaves Citizens Adrift</h2>
+      <p>This is the lesson for policymakers: <strong>you can't just outsource services and expect participation to take care of itself.</strong></p>
+      <p>Without institutional anchors, privatization creates a governance vacuum where citizens lose their voice. The contracts get signed, the services get delivered, but the public is left on the outside looking in.</p>
+    </div>
+
+    <!-- ===== Step 12b: Takeaway - Who Benefits ===== -->
+    <div class="step" data-step="takeaway_solution">
+      <div class="step-label">The Takeaway</div>
+      <h2>It's the Lone Citizens Who Need It Most</h2>
+      <p><strong>Organized groups</strong>, like neighborhood associations or civic organizations, can navigate privatized governance on their own. They have resources, networks, and institutional know-how.</p>
+      <p>But <strong>individual citizens</strong>, the unaffiliated resident trying to have a say, face enormous barriers. They don't know which agency to contact. They lack the time to decode bureaucratic processes.</p>
+      <p>Universities level the playing field by providing neutral meeting spaces, translating complex policy into accessible knowledge, and lending credibility to citizen-led initiatives.</p>
+    </div>
+
+    <!-- ===== Step 12c: Takeaway - The Big Picture ===== -->
+    <div class="step" data-step="takeaway_final">
+      <div class="step-label">The Takeaway</div>
+      <h2>It Was Never About Privatization Alone</h2>
+      <p>The debate was never really about whether privatization is good or bad for democracy.</p>
+      <p>It was about whether we invest in the <strong>institutions that keep democracy working</strong>, no matter who delivers the services.</p>
+      <div class="pull-quote">Co-production doesn't survive on its own in a privatized landscape. It needs anchors. And universities, already embedded in communities across America, are ready to play that role.</div>
+    </div>
+
+    <!-- Spacer -->
+    <div style="height: 30vh;"></div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<div id="footer">
+  <p>Institutional Infrastructure and Co-production in Privatized Governance: The Role of Universities</p>
+  <p>Data: 2017 ICMA Alternative Service Delivery Survey &middot; 738 U.S. Local Governments (625 Cities, 113 Counties)</p>
+  <p style="margin-top:0.5rem;">Built with D3.js and Scrollama</p>
+</div>
+
+<script>
+// ===== GLOBALS =====
+let DATA = [];
+let FIPS_MAP = {};
+let FIPS_SET = new Set();
+let COUNTY_CENTROIDS = {};
+let ICMA_FIPS = new Set();      // All ICMA survey county FIPS
+let PRIV_FIPS = new Set();      // Counties with privatization (q4=Yes)
+
+// Photo overlay mapping: step -> image file (replaces map with photo)
+const STEP_PHOTOS = {
+  takeaway_problem: 'privatization.jpeg',
+  takeaway_solution: 'community.png',
+  takeaway_final: 'calicoproduction.png',
+};
+
+const mapContainer = document.getElementById('map');
+const tooltip = document.getElementById('tooltip');
+const legend = document.getElementById('legend');
+const counterEl = document.getElementById('counter');
+const counterNum = document.getElementById('counter-num');
+const counterLabel = document.getElementById('counter-label');
+
+let counties, svg, g;
+let currentStep = 'landscape';
+
+// ===== PRE-PROJECTED MAP =====
+function initMap(us) {
+  // counties-albers-10m.json is pre-projected; use viewBox for scaling
+  const path = d3.geoPath();
+
+  svg = d3.select('#map')
+    .attr('viewBox', '-60 0 1020 620')
+    .attr('preserveAspectRatio', 'xMidYMid meet');
+  g = svg.append('g');
+
+  const countyFeatures = topojson.feature(us, us.objects.counties).features;
+
+  // Store centroids for university dots
+  countyFeatures.forEach(f => {
+    const c = path.centroid(f);
+    if (c && !isNaN(c[0])) COUNTY_CENTROIDS[f.id] = c;
+  });
+
+  // Draw counties
+  counties = g.selectAll('.county')
+    .data(countyFeatures)
+    .join('path')
+    .attr('class', 'county')
+    .attr('d', path)
+    .attr('fill', '#111122')
+    .attr('data-fips', d => d.id)
+    .on('mouseover', function(event, d) {
+      const rec = FIPS_MAP[d.id];
+      if (rec) {
+        tooltip.style.display = 'block';
+        tooltip.innerHTML = `<strong>${rec.name}</strong><br>` +
+          `Plan: ${rec.coplan?'Yes':'No'} | Design: ${rec.codesign?'Yes':'No'}<br>` +
+          `Deliver: ${rec.codelivery?'Yes':'No'} | Assess: ${rec.coassess?'Yes':'No'}` +
+          (rec.univ ? '<br>University present' : '') +
+          (rec.r1 ? ' (R1)' : '');
+      } else {
+        tooltip.style.display = 'block';
+        tooltip.innerHTML = '<em>Not in survey</em>';
+      }
+    })
+    .on('mousemove', function(event) {
+      const r = mapContainer.getBoundingClientRect();
+      tooltip.style.left = (event.clientX - r.left) + 'px';
+      tooltip.style.top = (event.clientY - r.top) + 'px';
+    })
+    .on('mouseout', () => { tooltip.style.display = 'none'; });
+
+  // State borders
+  g.append('path')
+    .datum(topojson.mesh(us, us.objects.states, (a, b) => a !== b))
+    .attr('class', 'state-border')
+    .attr('d', path);
+
+  // University dot layers
+  g.append('g').attr('id', 'univ-dots');
+  g.append('g').attr('id', 'r1-dots');
+}
+
+// ===== COLORS =====
+const C_BASE = '#111122';
+const C_SURVEY = '#1a2240';
+const C_DIM = '#151528';
+const STAGE_COLORS = {
+  coplan: '#3b82f6',
+  codesign: '#6366f1',
+  codelivery: '#8b5cf6',
+  coassess: '#a855f7',
+};
+
+function updateMap(step) {
+  currentStep = step;
+
+  // Photo overlay (takeaway steps)
+  const photoEl = document.getElementById('map-photo');
+  const photoImg = document.getElementById('map-photo-img');
+  const mapSource = document.querySelector('.map-source');
+  if (STEP_PHOTOS[step]) {
+    photoImg.src = STEP_PHOTOS[step];
+    photoEl.style.opacity = '1';
+    legend.style.display = 'none';
+    counterEl.style.display = 'none';
+    if (mapSource) mapSource.style.display = 'none';
+    return; // skip map updates for photo steps
+  }
+  // Full-width interlude (what_coprod covers the map with its own layout)
+  if (step === 'what_coprod') {
+    photoEl.style.opacity = '0';
+    legend.style.display = 'none';
+    counterEl.style.display = 'none';
+    if (mapSource) mapSource.style.display = 'none';
+    return;
+  }
+  // Normal map steps
+  photoEl.style.opacity = '0';
+  legend.style.display = '';
+  if (mapSource) mapSource.style.display = '';
+
+  // Clear dots unless needed
+  const showUniv = ['universities','when_matters','sectors'].includes(step);
+  const showR1 = false;
+
+  if (!showUniv) d3.select('#univ-dots').selectAll('*').remove();
+  if (!showR1) d3.select('#r1-dots').selectAll('*').remove();
+
+  // Update county strokes for survey boundary steps
+  const showBoundary = ['all_survey','privatization'].includes(step);
+
+  counties.transition('main').duration(600)
+    .attr('stroke', showBoundary && step === 'all_survey' ? function(d) {
+      return ICMA_FIPS.has(d.id) ? 'rgba(255,255,255,0.35)' : '#1a1a2e';
+    } : showBoundary && step === 'privatization' ? function(d) {
+      if (PRIV_FIPS.has(d.id)) return 'rgba(255,255,255,0.5)';
+      if (ICMA_FIPS.has(d.id)) return 'rgba(255,255,255,0.15)';
+      return '#1a1a2e';
+    } : '#1a1a2e')
+    .attr('stroke-width', showBoundary ? '0.5px' : '0.3px')
+    .attr('fill', function(d) {
+      const rec = FIPS_MAP[d.id];
+      const inICMA = ICMA_FIPS.has(d.id);
+      const inPriv = PRIV_FIPS.has(d.id);
+      const inSurvey = FIPS_SET.has(d.id);
+
+      switch(step) {
+        case 'all_survey':
+          return inICMA ? '#1a2240' : C_BASE;
+        case 'privatization':
+          if (inPriv) return '#3b82f6';
+          return inICMA ? '#151530' : C_BASE;
+        case 'landscape':
+          return inSurvey ? C_SURVEY : C_BASE;
+        // what_coprod returns early (fullwidth layout)
+        case 'coplan':
+          return rec && rec.coplan ? STAGE_COLORS.coplan : (inSurvey ? C_DIM : C_BASE);
+        case 'codelivery':
+          return rec && rec.codelivery ? STAGE_COLORS.codelivery : (inSurvey ? C_DIM : C_BASE);
+        case 'coassess':
+          return rec && rec.coassess ? STAGE_COLORS.coassess : (inSurvey ? C_DIM : C_BASE);
+        case 'puzzle':
+        case 'photo_break':
+        case 'research_q':
+          return (rec && rec.coprod_sum >= 1) ? 'rgba(108,155,255,0.25)' : C_BASE;
+        case 'universities':
+        case 'when_matters':
+        case 'sectors': {
+          if (rec && rec.univ) return '#2a4080';
+          return (rec && rec.coprod_sum >= 1) ? 'rgba(108,155,255,0.15)' : C_BASE;
+        }
+        // takeaway steps use photo overlay, won't reach here
+        default:
+          return C_BASE;
+      }
+    });
+
+  // Draw university dots
+  if (showUniv && d3.select('#univ-dots').selectAll('circle').empty()) {
+    const univData = DATA.filter(r => r.univ && COUNTY_CENTROIDS[r.fips]);
+    d3.select('#univ-dots').selectAll('circle')
+      .data(univData)
+      .join('circle')
+      .attr('cx', d => COUNTY_CENTROIDS[d.fips][0])
+      .attr('cy', d => COUNTY_CENTROIDS[d.fips][1])
+      .attr('r', 0)
+      .attr('fill', '#fbbf24')
+      .attr('stroke', '#000')
+      .attr('stroke-width', 0.5)
+      .attr('opacity', 0.9)
+      .transition().duration(700).delay((d,i) => i * 12)
+      .attr('r', 5);
+  }
+
+  if (showR1 && d3.select('#r1-dots').selectAll('circle').empty()) {
+    const r1Data = DATA.filter(r => r.r1 && COUNTY_CENTROIDS[r.fips]);
+    d3.select('#r1-dots').selectAll('circle')
+      .data(r1Data)
+      .join('circle')
+      .attr('cx', d => COUNTY_CENTROIDS[d.fips][0])
+      .attr('cy', d => COUNTY_CENTROIDS[d.fips][1])
+      .attr('r', 0)
+      .attr('fill', '#ef4444')
+      .attr('stroke', '#fff')
+      .attr('stroke-width', 1)
+      .attr('opacity', 0.95)
+      .transition().duration(700).delay((d,i) => i * 40 + 300)
+      .attr('r', 8);
+  }
+
+  // Legend & counter
+  updateLegend(step);
+  updateCounter(step);
+}
+
+function updateCounter(step) {
+  const countMap = {
+    all_survey: { n: ICMA_FIPS.size, label: 'counties surveyed' },
+    privatization: { n: PRIV_FIPS.size, label: 'counties with privatization' },
+    landscape: { n: 738, label: 'local governments (572 counties)' },
+    // what_coprod uses fullwidth layout, no counter
+    coplan: { n: DATA.filter(r=>r.coplan).length, label: 'counties co-planning' },
+    codelivery: { n: DATA.filter(r=>r.codelivery).length, label: 'counties co-delivering' },
+    coassess: { n: DATA.filter(r=>r.coassess).length, label: 'counties co-assessing' },
+    puzzle: { n: 738, label: 'local governments' },
+    photo_break: { n: 738, label: 'local governments' },
+    research_q: { n: 738, label: 'local governments examined' },
+    universities: { n: 148, label: 'jurisdictions with university' },
+    // who_anchored removed, merged into takeaway
+    when_matters: { n: 148, label: 'jurisdictions with university' },
+    sectors: { n: 148, label: 'jurisdictions with university' },
+    // takeaway steps use photo overlay
+  };
+
+  const info = countMap[step];
+  if (info) {
+    counterEl.style.display = 'block';
+    animateCounter(info.n);
+    counterLabel.textContent = info.label;
+  } else {
+    counterEl.style.display = 'none';
+  }
+}
+
+function animateCounter(target) {
+  const start = parseInt(counterNum.textContent) || 0;
+  const duration = 700;
+  const t0 = performance.now();
+  function tick(now) {
+    const p = Math.min((now - t0) / duration, 1);
+    const ease = 1 - Math.pow(1 - p, 3);
+    counterNum.textContent = Math.round(start + (target - start) * ease);
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+}
+
+function updateLegend(step) {
+  const L = {
+    all_survey: `<div class="legend-title">ICMA 2017 ASD Survey</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#1a2240;border:1px solid rgba(255,255,255,0.35)"></div>Survey respondent county</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#111122"></div>No response</div>`,
+    privatization: `<div class="legend-title">Private Service Delivery</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#3b82f6"></div>Active privatization</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#151530"></div>Surveyed</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#111122"></div>Not surveyed</div>`,
+    landscape: `<div class="legend-title">Co-Production Sample</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#1a2240"></div>Co-production data</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#111122"></div>Not in sample</div>`,
+    // what_coprod uses fullwidth layout, no legend
+    coplan: `<div class="legend-title">Co-Planning</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#3b82f6"></div>Engages in co-planning</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#151528"></div>Does not</div>`,
+    codelivery: `<div class="legend-title">Co-Delivery</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#8b5cf6"></div>Engages in co-delivery</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#151528"></div>Does not</div>`,
+    coassess: `<div class="legend-title">Co-Assessment</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#a855f7"></div>Engages in co-assessment</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#151528"></div>Does not</div>`,
+    puzzle: `<div class="legend-title">The Puzzle</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(108,155,255,0.25)"></div>Co-producing</div>`,
+    photo_break: `<div class="legend-title">The Puzzle</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(108,155,255,0.25)"></div>Co-producing</div>`,
+    research_q: `<div class="legend-title">Research Question</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(108,155,255,0.25)"></div>Co-producing</div>`,
+    universities: `<div class="legend-title">Universities</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#2a4080"></div>University county</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fbbf24;border-radius:50%"></div>University</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:rgba(108,155,255,0.15)"></div>Other surveyed</div>`,
+    when_matters: `<div class="legend-title">University Effect by Stage</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fbbf24;border-radius:50%"></div>University</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#2a4080"></div>University county</div>`,
+    sectors: `<div class="legend-title">Sector & Universities</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fbbf24;border-radius:50%"></div>University</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#2a4080"></div>University county</div>`,
+    // takeaway steps use photo overlay
+  };
+  legend.innerHTML = L[step] || '';
+}
+
+// ===== SCROLLAMA =====
+function initScrollama() {
+  const scroller = scrollama();
+  scroller.setup({ step: '.step', offset: 0.5, debug: false })
+    .onStepEnter(resp => {
+      d3.selectAll('.step').classed('is-active', false);
+      d3.select(resp.element).classed('is-active', true);
+      updateMap(resp.element.dataset.step);
+    });
+  window.addEventListener('resize', scroller.resize);
+}
+
+// ===== INIT =====
+async function init() {
+  try {
+    console.log('[storymap] Loading data...');
+    const [dataResp, usResp, icmaResp] = await Promise.all([
+      fetch('data.json'),
+      fetch('https://cdn.jsdelivr.net/npm/us-atlas@3/counties-albers-10m.json'),
+      fetch('icma_survey.json')
+    ]);
+
+    if (!dataResp.ok) throw new Error('data.json failed: ' + dataResp.status);
+    if (!usResp.ok) throw new Error('TopoJSON failed: ' + usResp.status);
+    if (!icmaResp.ok) throw new Error('icma_survey.json failed: ' + icmaResp.status);
+
+    DATA = await dataResp.json();
+    const us = await usResp.json();
+    const icmaData = await icmaResp.json();
+
+    // Build ICMA survey FIPS sets
+    icmaData.forEach(d => {
+      const fips = String(d.fips).padStart(5, '0');
+      ICMA_FIPS.add(fips);
+      if (d.privatization) PRIV_FIPS.add(fips);
+    });
+    console.log('[storymap] Data loaded:', DATA.length, 'records, TopoJSON objects:', Object.keys(us.objects));
+
+    // Pad FIPS and build lookup
+    DATA.forEach(d => { d.fips = String(d.fips).padStart(5, '0'); });
+    FIPS_SET = new Set(DATA.map(d => d.fips));
+    DATA.forEach(d => { FIPS_MAP[d.fips] = d; });
+
+    initMap(us);
+    console.log('[storymap] Map initialized, counties drawn:', document.querySelectorAll('.county').length);
+    updateMap('all_survey');
+    initScrollama();
+    console.log('[storymap] Ready!');
+  } catch(err) {
+    console.error('[storymap] INIT ERROR:', err);
+    document.getElementById('map').insertAdjacentHTML('afterend',
+      '<div style="color:red;padding:2rem;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:999;">' +
+      '<h3>Map failed to load</h3><p>' + err.message + '</p></div>');
+  }
+}
+
+init();
+</script>
+</body>
+</html>

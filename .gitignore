@@ -1,0 +1,6 @@
+*.xlsx
+*.pdf
+*.docx
+*.tmp
+*.tmp:*
+*:Zone.Identifier
