@@ -294,10 +294,10 @@ body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e8; ov
     <div class="step" data-step="all_survey">
       <div class="step-label">The Data</div>
       <h2>Local Governments Responded</h2>
-      <div class="stat-big">2,343</div>
-      <div class="stat-label">local governments across America</div>
-      <p>In 2017, the International City/County Management Association (ICMA) conducted its Alternative Service Delivery Survey, reaching local governments nationwide.</p>
-      <p>The responding local governments include counties, cities, and towns, spanning 1,225 counties across every region of the United States. Each highlighted boundary on this map represents a county where at least one local government participated.</p>
+      <div class="stat-big">1,225</div>
+      <div class="stat-label">counties across America</div>
+      <p>In 2017, the International City/County Management Association (ICMA) conducted its Alternative Service Delivery Survey. 2,343 local governments responded nationwide.</p>
+      <p>This map aggregates responses to the county level for geographic clarity. Each highlighted boundary represents one of the 1,225 counties where at least one local government participated.</p>
     </div>
 
     <!-- ===== Step -1: Privatization Experience ===== -->
@@ -315,10 +315,10 @@ body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e8; ov
     <div class="step" data-step="landscape">
       <div class="step-label">The Study Sample</div>
       <h2>Zooming In:<br>Who Co-Produces?</h2>
-      <div class="stat-big">738</div>
-      <div class="stat-label">local governments with co-production data</div>
-      <p>The same ICMA survey also asked about <strong>citizen co-production</strong>: whether local governments involve citizens in planning, designing, delivering, and assessing public services.</p>
-      <p><strong>738 local governments</strong> (625 cities and 113 counties) provided co-production data. On this map, responses are aggregated to the <strong>county level</strong> (572 counties) for geographic visualization, but the study analyzes each jurisdiction individually.</p>
+      <div class="stat-big">572</div>
+      <div class="stat-label">counties with co-production data</div>
+      <p>The same ICMA survey also asked about citizen co-production: whether local governments involve citizens in planning, designing, delivering, and assessing public services.</p>
+      <p>572 counties provided co-production data. Within these counties, 738 individual jurisdictions (625 cities and 113 counties) responded, and the underlying analysis examines each jurisdiction separately.</p>
     </div>
 
     <!-- ===== Step 1: What is co-production (full-width interlude) ===== -->
@@ -411,9 +411,9 @@ body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e8; ov
     <div class="step" data-step="universities">
       <div class="step-label">The Discovery</div>
       <h2>The Unexpected Anchor: Universities</h2>
-      <div class="stat-big">148</div>
-      <div class="stat-label">jurisdictions with a four-year university (20.1%)</div>
-      <p>Look at the yellow dots appearing on the map. Each one marks a county where at least one jurisdiction hosts a four-year university. In total, <strong>148 jurisdictions</strong> (43 counties and 105 cities) have a university nearby.</p>
+      <div class="stat-big">70</div>
+      <div class="stat-label">counties with a four-year university (12.2%)</div>
+      <p>Look at the yellow dots appearing on the map. Each one marks a county where at least one four-year university is present.</p>
       <p>Here's what we found: <strong>when a university is present, privatization actually boosts citizen co-production.</strong> Without a university? Outsourcing has no measurable effect. With one? The relationship flips positive.</p>
       <p>Universities act as <em>institutional anchors</em>, providing the knowledge, neutral spaces, and organizational capacity that citizens need to participate in a fragmented service landscape.</p>
     </div>
@@ -466,7 +466,7 @@ body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e8; ov
 <!-- FOOTER -->
 <div id="footer">
   <p>Institutional Infrastructure and Co-production in Privatized Governance: The Role of Universities</p>
-  <p>Data: 2017 ICMA Alternative Service Delivery Survey &middot; 738 U.S. Local Governments (625 Cities, 113 Counties)</p>
+  <p>Data: 2017 ICMA Alternative Service Delivery Survey &middot; 1,225 Counties (2,343 Local Governments)</p>
   <p style="margin-top:0.5rem;">Built with D3.js and Scrollama</p>
 </div>
 
@@ -690,20 +690,20 @@ function updateMap(step) {
 
 function updateCounter(step) {
   const countMap = {
-    all_survey: { n: ICMA_FIPS.size, label: 'counties surveyed' },
+    all_survey: { n: 1225, label: 'counties surveyed' },
     privatization: { n: 1136, label: 'counties with privatization' },
-    landscape: { n: 738, label: 'local governments (572 counties)' },
+    landscape: { n: 572, label: 'counties with co-production data' },
     // what_coprod uses fullwidth layout, no counter
     coplan: { n: DATA.filter(r=>r.coplan).length, label: 'counties co-planning' },
     codesign: { n: DATA.filter(r=>r.codesign).length, label: 'counties co-designing' },
     codelivery: { n: DATA.filter(r=>r.codelivery).length, label: 'counties co-delivering' },
     coassess: { n: DATA.filter(r=>r.coassess).length, label: 'counties co-assessing' },
-    puzzle: { n: 738, label: 'local governments' },
-    photo_break: { n: 738, label: 'local governments' },
-    research_q: { n: 738, label: 'local governments examined' },
-    universities: { n: 148, label: 'jurisdictions with university' },
+    puzzle: { n: 572, label: 'counties' },
+    photo_break: { n: 572, label: 'counties' },
+    research_q: { n: 572, label: 'counties examined' },
+    universities: { n: 70, label: 'counties with university' },
     // who_anchored removed, merged into takeaway
-    when_matters: { n: 148, label: 'jurisdictions with university' },
+    when_matters: { n: 70, label: 'counties with university' },
     // takeaway steps use photo overlay
   };
 
