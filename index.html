@@ -385,26 +385,17 @@ body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e8; ov
     <div class="step" data-step="puzzle">
       <div class="step-label">The Puzzle</div>
       <h2>Does Privatization Alone Explain It?</h2>
-      <p>Here's what surprised us. When we looked at the data, <strong>privatization by itself neither helps nor hurts</strong> citizen co-production. Communities that outsource heavily and those that don't show similar levels of co-production.</p>
+      <p>Here's what surprised us. When we looked at the data, privatization by itself neither helps nor hurts citizen co-production. Communities that outsource heavily and those that don't show similar levels of co-production.</p>
       <p>For decades, scholars have debated whether privatization helps or hinders citizen participation. But what if neither camp is asking the right question?</p>
-      <div class="pull-quote" style="font-size:clamp(0.95rem,1.6vw,1.15rem);">What if, in a privatized service environment, citizen participation doesn't disappear on its own, but needs institutional support to survive? Could there be anchors that help citizens stay engaged even when services are outsourced?</div>
+      <p>What if citizens need <em>institutional support</em> to stay engaged in a privatized service environment? Could there be anchors that sustain participation even when services are outsourced?</p>
     </div>
 
-    <!-- ===== Photo Interlude ===== -->
-    <div class="step" data-step="photo_break">
-      <div class="step-label">A Closer Look</div>
-      <h2>What if<br>the answer was<br>already in your neighborhood?</h2>
-      <p>Across the country, universities open their doors to communities. Round tables replace lecture halls. Residents sit alongside researchers.</p>
-      <p>This is where institutional infrastructure comes to life.</p>
-    </div>
-
-    <!-- ===== Step 7.5: Research Question ===== -->
+    <!-- ===== Step 7: Research Question ===== -->
     <div class="step" data-step="research_q">
       <div class="step-label">The Research Question</div>
-      <h2>Could Institutional Infrastructure Be the Missing Link?</h2>
-      <p>In a privatized governance environment, citizens face new barriers to participation: fragmented service providers, unclear accountability, and complex contractual structures. <strong>Do they need institutional support to stay engaged?</strong></p>
-      <p>We examined whether <em>institutional infrastructure</em>, the knowledge resources, relational networks, and physical spaces that support civic participation, could moderate the relationship between privatization and co-production.</p>
-      <p>More specifically, we looked at three dimensions of institutional infrastructure: the capacity to translate complex policy into accessible knowledge, the ability to convene diverse stakeholders in neutral settings, and the organizational resources to sustain civic engagement over time.</p>
+      <h2>Could Institutional Infrastructure<br>Be the Missing Link?</h2>
+      <p>In privatized governance, citizens face fragmented service providers, unclear accountability, and complex contractual structures. We examined whether <em>institutional infrastructure</em> could moderate the relationship between privatization and co-production.</p>
+      <p>We identified three dimensions:<br><span style="color:#fbbf24;font-weight:600;">Epistemic infrastructure</span> — translating complex policy into accessible knowledge.<br><span style="color:#fbbf24;font-weight:600;">Relational infrastructure</span> — convening diverse stakeholders in neutral settings.<br><span style="color:#fbbf24;font-weight:600;">Physical infrastructure</span> — providing spaces and organizational resources to sustain civic engagement.</p>
     </div>
 
     <!-- ===== Step 8: Enter the University ===== -->
@@ -636,7 +627,6 @@ function updateMap(step) {
         case 'coassess':
           return rec && rec.coassess ? STAGE_COLORS.coassess : (inSurvey ? C_DIM : C_BASE);
         case 'puzzle':
-        case 'photo_break':
         case 'research_q':
           return (rec && rec.coprod_sum >= 1) ? 'rgba(108,155,255,0.25)' : C_BASE;
         case 'universities':
@@ -699,7 +689,6 @@ function updateCounter(step) {
     codelivery: { n: DATA.filter(r=>r.codelivery).length, label: 'counties co-delivering' },
     coassess: { n: DATA.filter(r=>r.coassess).length, label: 'counties co-assessing' },
     puzzle: { n: 572, label: 'counties' },
-    photo_break: { n: 572, label: 'counties' },
     research_q: { n: 572, label: 'counties examined' },
     universities: { n: 70, label: 'counties with university' },
     // who_anchored removed, merged into takeaway
@@ -756,8 +745,6 @@ function updateLegend(step) {
       <div class="legend-item"><div class="legend-swatch" style="background:#a855f7"></div>Engages in co-assessment</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#151528"></div>Does not</div>`,
     puzzle: `<div class="legend-title">The Puzzle</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:rgba(108,155,255,0.25)"></div>Co-producing</div>`,
-    photo_break: `<div class="legend-title">The Puzzle</div>
       <div class="legend-item"><div class="legend-swatch" style="background:rgba(108,155,255,0.25)"></div>Co-producing</div>`,
     research_q: `<div class="legend-title">Research Question</div>
       <div class="legend-item"><div class="legend-swatch" style="background:rgba(108,155,255,0.25)"></div>Co-producing</div>`,
