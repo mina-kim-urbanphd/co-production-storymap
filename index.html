@@ -304,9 +304,11 @@ body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e8; ov
     <div class="step" data-step="privatization">
       <div class="step-label">Privatization</div>
       <h2>Who Has Outsourced Public Services?</h2>
-      <p>The survey cataloged <strong>67 public services</strong>, from road maintenance to public safety, and tracked how each is delivered: by government employees, for-profit contractors, nonprofits, or other governments.</p>
-      <p>Highlighted on this map are counties where local governments have actively pursued private service delivery. Across the full sample, privatization is not binary but a <strong>spectrum</strong>: some communities outsource a handful of services, while others contract out the majority.</p>
-      <p>But what happens to <strong>citizen participation</strong> as more services move outside government? Does outsourcing silence the public voice, or can something anchor it?</p>
+      <div class="stat-big">92.7%</div>
+      <div class="stat-label">of surveyed counties use private service delivery</div>
+      <p>The survey cataloged 67 public services, from road maintenance to public safety, and tracked how each is delivered: by government employees, for-profit contractors, nonprofits, franchises, or volunteers.</p>
+      <p>The answer is: nearly everyone. Across 1,225 counties, 1,136 have at least one service delivered through alternative mechanisms. Privatization is not binary but a spectrum: some communities outsource a handful of services, while others contract out the majority.</p>
+      <p>But what happens to citizen participation as more services move outside government? Does outsourcing silence the public voice, or can something anchor it?</p>
     </div>
 
     <!-- ===== Step 0: Co-Production Respondents ===== -->
@@ -689,7 +691,7 @@ function updateMap(step) {
 function updateCounter(step) {
   const countMap = {
     all_survey: { n: ICMA_FIPS.size, label: 'counties surveyed' },
-    privatization: { n: PRIV_FIPS.size, label: 'counties with privatization' },
+    privatization: { n: 1136, label: 'counties with privatization' },
     landscape: { n: 738, label: 'local governments (572 counties)' },
     // what_coprod uses fullwidth layout, no counter
     coplan: { n: DATA.filter(r=>r.coplan).length, label: 'counties co-planning' },
