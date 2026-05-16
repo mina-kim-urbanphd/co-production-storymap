@@ -343,7 +343,19 @@ body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e0e0e8; ov
       </div>
     </div>
 
-    <!-- ===== Step 3: Co-Delivery ===== -->
+    <!-- ===== Step 3: Co-Design ===== -->
+    <div class="step" data-step="codesign">
+      <div class="step-label">Stage 2 of 4</div>
+      <h2>Co-Design</h2>
+      <p>Beyond identifying problems, citizens help decide how services will be arranged or organized. Co-design involves shaping program structures, selecting delivery methods, and setting service standards.</p>
+      <p>This stage demands more from participants: understanding budgets, regulations, and trade-offs. Yet participation remains high, with organized civic groups again leading the way.</p>
+      <div class="target-bars">
+        <div class="target-bar"><div class="bar-label"><span>Organized Civic Groups</span><span>48.1%</span></div><div class="bar-track"><div class="bar-fill" style="width:48.1%"></div></div></div>
+        <div class="target-bar"><div class="bar-label"><span>Individual Citizens</span><span>39.2%</span></div><div class="bar-track"><div class="bar-fill" style="width:39.2%"></div></div></div>
+      </div>
+    </div>
+
+    <!-- ===== Step 4: Co-Delivery ===== -->
     <div class="step" data-step="codelivery">
       <div class="step-label">Stage 3 of 4</div>
       <h2>Co-Delivery</h2>
@@ -615,6 +627,8 @@ function updateMap(step) {
         // what_coprod returns early (fullwidth layout)
         case 'coplan':
           return rec && rec.coplan ? STAGE_COLORS.coplan : (inSurvey ? C_DIM : C_BASE);
+        case 'codesign':
+          return rec && rec.codesign ? STAGE_COLORS.codesign : (inSurvey ? C_DIM : C_BASE);
         case 'codelivery':
           return rec && rec.codelivery ? STAGE_COLORS.codelivery : (inSurvey ? C_DIM : C_BASE);
         case 'coassess':
@@ -679,6 +693,7 @@ function updateCounter(step) {
     landscape: { n: 738, label: 'local governments (572 counties)' },
     // what_coprod uses fullwidth layout, no counter
     coplan: { n: DATA.filter(r=>r.coplan).length, label: 'counties co-planning' },
+    codesign: { n: DATA.filter(r=>r.codesign).length, label: 'counties co-designing' },
     codelivery: { n: DATA.filter(r=>r.codelivery).length, label: 'counties co-delivering' },
     coassess: { n: DATA.filter(r=>r.coassess).length, label: 'counties co-assessing' },
     puzzle: { n: 738, label: 'local governments' },
@@ -728,6 +743,9 @@ function updateLegend(step) {
     // what_coprod uses fullwidth layout, no legend
     coplan: `<div class="legend-title">Co-Planning</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#3b82f6"></div>Engages in co-planning</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#151528"></div>Does not</div>`,
+    codesign: `<div class="legend-title">Co-Design</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#6366f1"></div>Engages in co-design</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#151528"></div>Does not</div>`,
     codelivery: `<div class="legend-title">Co-Delivery</div>
       <div class="legend-item"><div class="legend-swatch" style="background:#8b5cf6"></div>Engages in co-delivery</div>
