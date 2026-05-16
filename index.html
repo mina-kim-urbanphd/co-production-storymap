@@ -631,8 +631,9 @@ function updateMap(step) {
           return (rec && rec.coprod_sum >= 1) ? 'rgba(108,155,255,0.25)' : C_BASE;
         case 'universities':
         case 'when_matters': {
-          if (rec && rec.univ) return '#2a4080';
-          return (rec && rec.coprod_sum >= 1) ? 'rgba(108,155,255,0.15)' : C_BASE;
+          const inPriv = PRIV_FIPS.has(d.id);
+          if (inPriv) return '#3b82f6';
+          return inICMA ? '#151530' : C_BASE;
         }
         // takeaway steps use photo overlay, won't reach here
         default:
@@ -748,13 +749,12 @@ function updateLegend(step) {
       <div class="legend-item"><div class="legend-swatch" style="background:rgba(108,155,255,0.25)"></div>Co-producing</div>`,
     research_q: `<div class="legend-title">Research Question</div>
       <div class="legend-item"><div class="legend-swatch" style="background:rgba(108,155,255,0.25)"></div>Co-producing</div>`,
-    universities: `<div class="legend-title">Universities</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#2a4080"></div>University county</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#fbbf24;border-radius:50%"></div>University</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:rgba(108,155,255,0.15)"></div>Other surveyed</div>`,
+    universities: `<div class="legend-title">Universities & Privatization</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#3b82f6"></div>Privatization county</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fbbf24;border-radius:50%"></div>University</div>`,
     when_matters: `<div class="legend-title">University Effect by Stage</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#fbbf24;border-radius:50%"></div>University</div>
-      <div class="legend-item"><div class="legend-swatch" style="background:#2a4080"></div>University county</div>`,
+      <div class="legend-item"><div class="legend-swatch" style="background:#3b82f6"></div>Privatization county</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#fbbf24;border-radius:50%"></div>University</div>`,
     // takeaway steps use photo overlay
   };
   legend.innerHTML = L[step] || '';
